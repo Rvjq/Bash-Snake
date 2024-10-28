@@ -5,7 +5,7 @@
 #include "screen.h"
 #include "timer.h"
 
-int snakeLenght = 6;
+int snakeLenght = 3;
 
 typedef struct snakePart {
     int X, Y;
@@ -31,12 +31,12 @@ int main() {
     drawBorders(DARKGRAY);
     SNAKEPART *head = spawnSnake();
 
-    drawSnake(head);
     
     while (1) {
         if(keyhit()) {
             if (readch() == 27) break;
         }
+        drawSnake(head);
         screenUpdate();
     }
 
@@ -59,7 +59,12 @@ SNAKEPART *spawnSnake() {
 }
 
 void despawnSnake(SNAKEPART *snakeHead) {
-    free(snakeHead);
+    SNAKEPART *temp;
+    while(snakeHead != NULL) {
+        temp = snakeHead;
+        snakeHead = snakeHead->next;
+        free(temp);
+    }
 }
 
 void addSnake(SNAKEPART *snakeHead, int x, int y) {
