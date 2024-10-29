@@ -8,16 +8,18 @@
 
 int snakeLenght = 3;
 int snakeDirection = 1;
-int i = 0;
 int difficulty = 1;
 int fruitX, fruitY;
-int points;
+int points, gameRunning;
+int changedDirection;
 
 typedef struct snakePart {
     int X, Y;
     struct snakePart *prev;
     struct snakePart *next;
 } SNAKEPART;
+
+void gameLoop ();
 
 void drawBorders (screenColor bg);
 
@@ -55,11 +57,27 @@ int main() {
     keyboardInit();
     timerInit(100);
 
+    gameLoop();
+    while(1) {
+        if(keyhit()) {
+            int key = readch();
+            if (key == 27) {
+                break;
+            }
+        }
+    }
+    timerDestroy();
+    keyboardDestroy();
+    screenDestroy();
+    return 0;
+}
+
+void gameLoop () {
     points = 0;
     drawBorders(RED);
     SNAKEPART *head = spawnSnake();
     spawnFruit(head);
-    
+    gameRunning = 1, changedDirection = 1;
     while (1) {
         if(keyhit()) {
             int key = readch();
@@ -72,26 +90,21 @@ int main() {
         if(getTimeDiff() > 100/difficulty) {
             timerUpdateTimer(1000);
             screenGotoxy(2,3);
-            i++;
-            printf("%d",i);
             moveSnake(head);
-            drawSnake(head);
+            if (!gameRunning) {
+                screenUpdate();
+                break;
+            }
             drawPoints(RED);
             if (points == (MAXX-2)*(MAXY-2)) {
                 gameWin();
                 break;
             }
+            drawSnake(head);
         }
-        screenGotoxy(10,5);
-        printf("%d",snakeDirection);
         screenUpdate();
     }
-
     despawnSnake(head);
-    timerDestroy();
-    keyboardDestroy();
-    screenDestroy();
-    return 0;
 }
 
 void spawnFruit(SNAKEPART *snakeHead) {
@@ -112,7 +125,7 @@ void spawnFruit(SNAKEPART *snakeHead) {
     }
     screenGotoxy(fruitX, fruitY);
     screenSetColor(RED, LIGHTRED);
-    printf("O");
+    printf("Ó");
     screenSetColor(WHITE, LIGHTRED);
 }
 
@@ -180,7 +193,7 @@ void collisionWall(SNAKEPART *snakeHead) {
         case 2: y++; break;
         case 3: x--; break;
     }
-    if(x == 1 || y == 1 || x == MAXX || y == MAXY) {
+    if(x == 1 || y == 1 || x == MAXX-1 || y == MAXY) {
         gameOver();
     }
 }
@@ -206,6 +219,7 @@ void collisionSnake(SNAKEPART *snakeHead) {
 }
 
 void moveSnake(SNAKEPART *snakeHead) {
+    changedDirection = 1;
     collisionWall(snakeHead);
     collisionSnake(snakeHead);
     collisionFruit(snakeHead);
@@ -292,22 +306,34 @@ void drawSnake(SNAKEPART *snakeHead) {
 }
 
 void inputHandler(int ch) {
-    switch (ch) {
-        case 'w': if (snakeDirection != 2) snakeDirection = 0; break;
-        case 'd': if (snakeDirection != 3) snakeDirection = 1; break;
-        case 's': if (snakeDirection != 0) snakeDirection = 2; break;
-        case 'a': if (snakeDirection != 1) snakeDirection = 3; break;
+    if (changedDirection) {
+        switch (ch) {
+            case 'w': if (snakeDirection != 2) snakeDirection = 0; break;
+            case 'd': if (snakeDirection != 3) snakeDirection = 1; break;
+            case 's': if (snakeDirection != 0) snakeDirection = 2; break;
+            case 'a': if (snakeDirection != 1) snakeDirection = 3; break;
+        }
+        changedDirection = 0;
     }
 }
 
 void gameOver() {
-    screenGotoxy(35, 6);
-    printf("Game Over");
+    screenGotoxy(MAXX/2-5, MAXY/2);
+    screenSetColor(WHITE, RED);
+    printf("Game Over!");
+    screenGotoxy(MAXX/2-5, MAXY/2+1);
+    printf("- %04d Ó -",points);
+    screenSetColor(WHITE, LIGHTRED);
+    screenGotoxy(fruitX, fruitY);
+    printf(" ");
+    gameRunning = 0;
 }
 
 void gameWin() {
-    screenGotoxy(35, 6);
+    screenSetColor(WHITE, GREEN);
+    screenGotoxy(MAXX/2-5, MAXY/2);
     printf("Você ganhou");
+    screenSetColor(WHITE, LIGHTRED);
 }
 
 void drawPoints (screenColor bg) {
