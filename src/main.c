@@ -11,6 +11,7 @@ int snakeDirection = 1;
 int i = 0;
 int difficulty = 1;
 int fruitX, fruitY;
+int points;
 
 typedef struct snakePart {
     int X, Y;
@@ -34,7 +35,7 @@ void collisionWall(SNAKEPART *snakeHead);
 
 void collisionSnake(SNAKEPART *snakeHead);
 
-void spawnFruit();
+void spawnFruit(SNAKEPART *snakeHead);
 
 SNAKEPART *spawnSnake();
 
@@ -44,15 +45,18 @@ void inputHandler(int ch);
 
 void gameOver();
 
+void gameWin();
+
 int main() {
     srand(time(NULL));
     screenInit(0);
     keyboardInit();
     timerInit(100);
 
-    drawBorders(DARKGRAY);
+    points = 0;
+    drawBorders(RED);
     SNAKEPART *head = spawnSnake();
-    spawnFruit();
+    spawnFruit(head);
     
     while (1) {
         if(keyhit()) {
@@ -70,6 +74,10 @@ int main() {
             printf("%d",i);
             moveSnake(head);
             drawSnake(head);
+            if (points == (MAXX-2)*(MAXY-2)) {
+                gameWin();
+                break;
+            }
         }
         screenGotoxy(10,5);
         printf("%d",snakeDirection);
@@ -83,9 +91,22 @@ int main() {
     return 0;
 }
 
-void spawnFruit() {
-    fruitX = rand()%MAXX;
-    fruitY = rand()%MAXY;
+void spawnFruit(SNAKEPART *snakeHead) {
+    int i;
+    SNAKEPART *temp;
+    while(i) {
+        temp = snakeHead;
+        i = 0;
+        fruitX = rand() % (MAXX - 3) + 2;
+        fruitY = rand() % (MAXY - 3) + 2;
+        while(temp->next != NULL) {
+            if(temp->X == fruitX && temp->Y == fruitY) {
+                i = 1;
+                break;
+            }
+            temp = temp->next;
+        }
+    }
     screenGotoxy(fruitX, fruitY);
     printf("O");
 }
@@ -97,7 +118,8 @@ SNAKEPART *spawnSnake() {
     head->prev = NULL;
     head->next = NULL;
     addSnake(head, MAXX/2, MAXY/2);
-    addSnake(head, (MAXX/2)-1, (MAXY/2));
+    addSnake(head, MAXX/2-1, MAXY/2);
+    addSnake(head, (MAXX/2)-2, (MAXY/2));
     return head;
 }
 
@@ -133,13 +155,14 @@ void collisionFruit(SNAKEPART *snakeHead) {
         case 3: x--; break;
     }
     if (x == fruitX && y == fruitY) {
-        spawnFruit();
+        spawnFruit(snakeHead);
         SNAKEPART *temp = snakeHead->next;
         while(temp->next != NULL) {
             temp = temp->next;
         }
         x = temp->X;
         y = temp->Y;
+        points++;
         addSnake(temp, x, y);
     }
 }
@@ -166,7 +189,7 @@ void collisionSnake(SNAKEPART *snakeHead) {
         case 3: x--; break;
     }
     SNAKEPART *temp = snakeHead->next;
-    while(temp != NULL) {
+    while(temp->next != NULL) {
         if(temp->X == x && temp->Y == y) {
             gameOver();
             break;
@@ -221,11 +244,39 @@ void drawSnake(SNAKEPART *snakeHead) {
         case 3: printf("◄"); break;
     }
     SNAKEPART *temp = snakeHead->next;
-    while(temp != NULL) {
+    SNAKEPART *tempNext = temp->next;
+    int x1, y1, x2, y2;
+    while(temp->next != NULL) {
         screenGotoxy(temp->X,temp->Y);
-        printf("─");
+        x1 = snakeHead->X - temp->X;
+        y1 = snakeHead->Y - temp->Y;
+        x2 = tempNext->X - temp->X;
+        y2 = tempNext->Y - temp->Y;
+        if ((x1 == -1 && y1 == 0 && x2 == 1 && y2 == 0) || (x1 == 1 && y1 == 0 && x2 == -1 && y2 == 0)) {
+            printf("─");
+        } else if ((x1 == 0 && y1 == -1 && x2 == 0 && y2 == 1) || (x1 == 0 && y1 == 1 && x2 == 0 && y2 == -1)) {
+            printf("│");
+        } else if ((x1 == 0 && y1 == -1 && x2 == 1 && y2 == 0) || (x1 == 1 && y1 == 0 && x2 == 0 && y2 == -1)) {
+            printf("╰");
+        } else if ((x1 == -1 && y1 == 0 && x2 == 0 && y2 == -1) || (x1 == 0 && y1 == -1 && x2 == -1 && y2 == 0)) {
+            printf("╯");
+        } else if ((x1 == -1 && y1 == 0 && x2 == 0 && y2 == 1) || (x1 == 0 && y1 == 1 && x2 == -1 && y2 == 0)) {
+            printf("╮");
+        } else if ((x1 == 0 && y1 == 1 && x2 == 1 && y2 == 0) || (x1 == 1 && y1 == 0 && x2 == 0 && y2 == 1)) {
+            printf("╭");
+        } else {
+            printf("O");
+        } 
+        snakeHead = snakeHead->next;
+        tempNext = tempNext->next;
         temp = temp->next;
     }
+    // screenGotoxy(temp->X,temp->Y);
+    // if(temp->X - snakeHead->X != 0) {
+    //     printf("─");
+    // } else {
+    //     printf("│");
+    // }
 }
 
 void inputHandler(int ch) {
@@ -240,6 +291,15 @@ void inputHandler(int ch) {
 void gameOver() {
     screenGotoxy(35, 6);
     printf("Game Over");
+}
+
+void gameWin() {
+    screenGotoxy(35, 6);
+    printf("Você ganhou");
+}
+
+void drawPoints (screenColor bg) {
+
 }
 
 void drawBorders (screenColor bg) {
@@ -272,6 +332,8 @@ void drawBorders (screenColor bg) {
     }
 
     screenBoxDisable();
+    //reminder to self LIGHTRED a.k.a 39 as bg is default terminal color. https://stackoverflow.com/questions/4842424/list-of-ansi-color-escape-sequences
+    screenSetColor(WHITE, LIGHTRED);
 }
 
 //{BLACK, RED, GREEN, BROWN, BLUE, MAGENTA, CYAN, LIGHTGRAY,DARKGRAY, LIGHTRED, LIGHTGREEN, YELLOW, LIGHTBLUE, LIGHTMAGENTA, LIGHTCYAN, WHITE}
