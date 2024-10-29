@@ -28,6 +28,12 @@ void addSnake(SNAKEPART *snakeHead, int x, int y);
 
 void moveSnake(SNAKEPART *snakeHead);
 
+void collisionFruit(SNAKEPART *snakeHead);
+
+void collisionWall(SNAKEPART *snakeHead);
+
+void collisionSnake(SNAKEPART *snakeHead);
+
 void spawnFruit();
 
 SNAKEPART *spawnSnake();
@@ -35,6 +41,8 @@ SNAKEPART *spawnSnake();
 void despawnSnake(SNAKEPART *snakeHead);
 
 void inputHandler(int ch);
+
+void gameOver();
 
 int main() {
     srand(time(NULL));
@@ -116,7 +124,61 @@ void addSnake(SNAKEPART *snakeHead, int x, int y) {
     temp->next = NULL;
 }
 
+void collisionFruit(SNAKEPART *snakeHead) {
+    int x = snakeHead->X, y = snakeHead->Y;
+    switch (snakeDirection) {
+        case 0: y--; break;
+        case 1: x++; break;
+        case 2: y++; break;
+        case 3: x--; break;
+    }
+    if (x == fruitX && y == fruitY) {
+        spawnFruit();
+        SNAKEPART *temp = snakeHead->next;
+        while(temp->next != NULL) {
+            temp = temp->next;
+        }
+        x = temp->X;
+        y = temp->Y;
+        addSnake(temp, x, y);
+    }
+}
+
+void collisionWall(SNAKEPART *snakeHead) {
+    int x = snakeHead->X, y = snakeHead->Y;
+    switch (snakeDirection) {
+        case 0: y--; break;
+        case 1: x++; break;
+        case 2: y++; break;
+        case 3: x--; break;
+    }
+    if(x == 1 || y == 1 || x == MAXX || y == MAXY) {
+        gameOver();
+    }
+}
+
+void collisionSnake(SNAKEPART *snakeHead) {
+    int x = snakeHead->X, y = snakeHead->Y;
+    switch (snakeDirection) {
+        case 0: y--; break;
+        case 1: x++; break;
+        case 2: y++; break;
+        case 3: x--; break;
+    }
+    SNAKEPART *temp = snakeHead->next;
+    while(temp != NULL) {
+        if(temp->X == x && temp->Y == y) {
+            gameOver();
+            break;
+        }
+        temp = temp->next;
+    }
+}
+
 void moveSnake(SNAKEPART *snakeHead) {
+    collisionWall(snakeHead);
+    collisionSnake(snakeHead);
+    collisionFruit(snakeHead);
     int x = snakeHead->X, y = snakeHead->Y, t;
     undrawSnake(snakeHead);
     SNAKEPART *temp = snakeHead->next;
@@ -173,6 +235,11 @@ void inputHandler(int ch) {
         case 's': if (snakeDirection != 0) snakeDirection = 2; break;
         case 'a': if (snakeDirection != 1) snakeDirection = 3; break;
     }
+}
+
+void gameOver() {
+    screenGotoxy(35, 6);
+    printf("Game Over");
 }
 
 void drawBorders (screenColor bg) {
