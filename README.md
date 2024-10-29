@@ -5,6 +5,7 @@ Um clone do famoso jogo da cobrinha para terminal Bash
 ## Controles
 
 wasd - para se movimentar
+
 esc - para sair do jogo
 
 ## Compilar
@@ -14,7 +15,7 @@ O jogo rodará apenas em um terminal linux. Caso você esteja no sistema Windows
 >Clone o projeto
 
 ```git
-git clone 
+git clone https://github.com/Rvjq/Bash-Snake.git
 ```
 
 >Navegue até a pasta do jogo
@@ -51,4 +52,5 @@ gcc -I./include src/*.c -o bash-snake
 </table>
 
 tput init
+
 cd /mnt/c/Users/Rafael/Documents/snakegame2
