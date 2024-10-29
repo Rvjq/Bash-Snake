@@ -6,7 +6,9 @@
 #include "timer.h"
 
 int snakeLenght = 3;
-int snakeDirection = 0;
+int snakeDirection = 1;
+int i = 0;
+int difficulty = 1;
 
 typedef struct snakePart {
     int X, Y;
@@ -18,7 +20,11 @@ void drawBorders (screenColor bg);
 
 void drawSnake(SNAKEPART *snakeHead);
 
+void undrawSnake(SNAKEPART *snakeHead);
+
 void addSnake(SNAKEPART *snakeHead, int x, int y);
+
+void moveSnake(SNAKEPART *snakeHead);
 
 SNAKEPART *spawnSnake();
 
@@ -37,15 +43,23 @@ int main() {
     
     while (1) {
         if(keyhit()) {
-            if (readch() == 27) {
+            int key = readch();
+            if (key == 27) {
                 break;
             } else {
-                inputHandler(readch());
+                inputHandler(key);
             }
+        }
+        if(getTimeDiff() > 100/difficulty) {
+            timerUpdateTimer(1000);
+            screenGotoxy(2,3);
+            i++;
+            printf("%d",i);
+            moveSnake(head);
+            drawSnake(head);
         }
         screenGotoxy(10,5);
         printf("%d",snakeDirection);
-        drawSnake(head);
         screenUpdate();
     }
 
@@ -88,6 +102,28 @@ void addSnake(SNAKEPART *snakeHead, int x, int y) {
     temp->Y = y;
     temp->prev = snakeHead;
     temp->next = NULL;
+}
+
+void moveSnake(SNAKEPART *snakeHead) {
+    undrawSnake(snakeHead);
+    switch (snakeDirection) {
+        case 0: snakeHead->Y--; break;
+        case 1: snakeHead->X++; break;
+        case 2: snakeHead->Y++; break;
+        case 3: snakeHead->X--; break;
+    }
+}
+
+void undrawSnake(SNAKEPART *snakeHead) {
+    // ╭╮╰╯│─ ▲►▼◄
+    screenGotoxy(snakeHead->X, snakeHead->Y);
+    printf(" ");
+    SNAKEPART *temp = snakeHead->next;
+    while(temp != NULL) {
+        screenGotoxy(temp->X,temp->Y);
+        printf(" ");
+        temp = temp->next;
+    }
 }
 
 void drawSnake(SNAKEPART *snakeHead) {
