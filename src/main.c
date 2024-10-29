@@ -21,6 +21,8 @@ typedef struct snakePart {
 
 void drawBorders (screenColor bg);
 
+void drawPoints (screenColor bg);
+
 void drawSnake(SNAKEPART *snakeHead);
 
 void undrawSnake(SNAKEPART *snakeHead);
@@ -74,6 +76,7 @@ int main() {
             printf("%d",i);
             moveSnake(head);
             drawSnake(head);
+            drawPoints(RED);
             if (points == (MAXX-2)*(MAXY-2)) {
                 gameWin();
                 break;
@@ -108,7 +111,9 @@ void spawnFruit(SNAKEPART *snakeHead) {
         }
     }
     screenGotoxy(fruitX, fruitY);
+    screenSetColor(RED, LIGHTRED);
     printf("O");
+    screenSetColor(WHITE, LIGHTRED);
 }
 
 SNAKEPART *spawnSnake() {
@@ -181,20 +186,22 @@ void collisionWall(SNAKEPART *snakeHead) {
 }
 
 void collisionSnake(SNAKEPART *snakeHead) {
-    int x = snakeHead->X, y = snakeHead->Y;
-    switch (snakeDirection) {
-        case 0: y--; break;
-        case 1: x++; break;
-        case 2: y++; break;
-        case 3: x--; break;
-    }
-    SNAKEPART *temp = snakeHead->next;
-    while(temp->next != NULL) {
-        if(temp->X == x && temp->Y == y) {
-            gameOver();
-            break;
+    if(points > 1) {
+        int x = snakeHead->X, y = snakeHead->Y;
+        switch (snakeDirection) {
+            case 0: y--; break;
+            case 1: x++; break;
+            case 2: y++; break;
+            case 3: x--; break;
         }
-        temp = temp->next;
+        SNAKEPART *temp = snakeHead->next;
+        while(temp->next != NULL) {
+            if(temp->X == x && temp->Y == y) {
+                gameOver();
+                break;
+            }
+            temp = temp->next;
+        }
     }
 }
 
@@ -236,6 +243,8 @@ void undrawSnake(SNAKEPART *snakeHead) {
 
 void drawSnake(SNAKEPART *snakeHead) {
     // ╭╮╰╯│─ ▲►▼◄
+    screenSetColor(LIGHTGREEN, LIGHTRED);
+
     screenGotoxy(snakeHead->X, snakeHead->Y);
     switch (snakeDirection) {
         case 0: printf("▲"); break;
@@ -247,6 +256,7 @@ void drawSnake(SNAKEPART *snakeHead) {
     SNAKEPART *tempNext = temp->next;
     int x1, y1, x2, y2;
     while(temp->next != NULL) {
+        screenSetColor(LIGHTGREEN, LIGHTRED);
         screenGotoxy(temp->X,temp->Y);
         x1 = snakeHead->X - temp->X;
         y1 = snakeHead->Y - temp->Y;
@@ -277,6 +287,8 @@ void drawSnake(SNAKEPART *snakeHead) {
     // } else {
     //     printf("│");
     // }
+    screenSetColor(WHITE, LIGHTRED);
+
 }
 
 void inputHandler(int ch) {
@@ -299,7 +311,10 @@ void gameWin() {
 }
 
 void drawPoints (screenColor bg) {
-
+    screenSetColor(WHITE, bg);
+    screenGotoxy((MAXX/2)-7,1);
+    printf("Pontuação: %03d",points);
+    screenSetColor(WHITE, LIGHTRED);
 }
 
 void drawBorders (screenColor bg) {
