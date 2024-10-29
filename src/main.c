@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "keyboard.h"
 #include "screen.h"
@@ -9,6 +10,7 @@ int snakeLenght = 3;
 int snakeDirection = 1;
 int i = 0;
 int difficulty = 1;
+int fruitX, fruitY;
 
 typedef struct snakePart {
     int X, Y;
@@ -26,6 +28,8 @@ void addSnake(SNAKEPART *snakeHead, int x, int y);
 
 void moveSnake(SNAKEPART *snakeHead);
 
+void spawnFruit();
+
 SNAKEPART *spawnSnake();
 
 void despawnSnake(SNAKEPART *snakeHead);
@@ -33,13 +37,14 @@ void despawnSnake(SNAKEPART *snakeHead);
 void inputHandler(int ch);
 
 int main() {
+    srand(time(NULL));
     screenInit(0);
     keyboardInit();
     timerInit(100);
 
     drawBorders(DARKGRAY);
     SNAKEPART *head = spawnSnake();
-
+    spawnFruit();
     
     while (1) {
         if(keyhit()) {
@@ -68,6 +73,13 @@ int main() {
     keyboardDestroy();
     screenDestroy();
     return 0;
+}
+
+void spawnFruit() {
+    fruitX = rand()%MAXX;
+    fruitY = rand()%MAXY;
+    screenGotoxy(fruitX, fruitY);
+    printf("O");
 }
 
 SNAKEPART *spawnSnake() {
@@ -105,7 +117,18 @@ void addSnake(SNAKEPART *snakeHead, int x, int y) {
 }
 
 void moveSnake(SNAKEPART *snakeHead) {
+    int x = snakeHead->X, y = snakeHead->Y, t;
     undrawSnake(snakeHead);
+    SNAKEPART *temp = snakeHead->next;
+    while(temp != NULL) {
+        t = temp->X;
+        temp->X = x;
+        x = t;
+        t = temp->Y;
+        temp->Y = y;
+        y = t;
+        temp = temp->next;
+    }
     switch (snakeDirection) {
         case 0: snakeHead->Y--; break;
         case 1: snakeHead->X++; break;
@@ -129,7 +152,12 @@ void undrawSnake(SNAKEPART *snakeHead) {
 void drawSnake(SNAKEPART *snakeHead) {
     // ╭╮╰╯│─ ▲►▼◄
     screenGotoxy(snakeHead->X, snakeHead->Y);
-    printf("►");
+    switch (snakeDirection) {
+        case 0: printf("▲"); break;
+        case 1: printf("►"); break;
+        case 2: printf("▼"); break;
+        case 3: printf("◄"); break;
+    }
     SNAKEPART *temp = snakeHead->next;
     while(temp != NULL) {
         screenGotoxy(temp->X,temp->Y);

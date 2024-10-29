@@ -11,6 +11,9 @@ void timerDestroy();
 
 void timerUpdateTimer(int valueMilliSec);
 
+//missing header ??
+int getTimeDiff();
+
 int timerTimeOver();
 
 void timerPrint();
