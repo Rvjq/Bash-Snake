@@ -6,6 +6,7 @@
 #include "timer.h"
 
 int snakeLenght = 3;
+int snakeDirection = 0;
 
 typedef struct snakePart {
     int X, Y;
@@ -23,6 +24,8 @@ SNAKEPART *spawnSnake();
 
 void despawnSnake(SNAKEPART *snakeHead);
 
+void inputHandler(int ch);
+
 int main() {
     screenInit(0);
     keyboardInit();
@@ -34,8 +37,14 @@ int main() {
     
     while (1) {
         if(keyhit()) {
-            if (readch() == 27) break;
+            if (readch() == 27) {
+                break;
+            } else {
+                inputHandler(readch());
+            }
         }
+        screenGotoxy(10,5);
+        printf("%d",snakeDirection);
         drawSnake(head);
         screenUpdate();
     }
@@ -90,6 +99,15 @@ void drawSnake(SNAKEPART *snakeHead) {
         screenGotoxy(temp->X,temp->Y);
         printf("─");
         temp = temp->next;
+    }
+}
+
+void inputHandler(int ch) {
+    switch (ch) {
+        case 'w': if (snakeDirection != 2) snakeDirection = 0; break;
+        case 'd': if (snakeDirection != 3) snakeDirection = 1; break;
+        case 's': if (snakeDirection != 0) snakeDirection = 2; break;
+        case 'a': if (snakeDirection != 1) snakeDirection = 3; break;
     }
 }
 
