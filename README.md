@@ -1,14 +1,14 @@
-# Bash Snake
+# 🍎 Bash Snake 🐍
 
 Um clone do famoso jogo da cobrinha para terminal Bash
 
-## Controles
+## 🎮 Controles
 
 wasd - para se movimentar
 
 esc - para sair do jogo
 
-## Compilar
+## 💻 Compilar
 
 O jogo rodará apenas em um terminal linux. Caso você esteja no sistema Windows recomendo usar WSL.
 
@@ -35,7 +35,7 @@ gcc -I./include src/*.c -o bash-snake
 ./bash-snake
 ```
 
-# Equipe
+# 🧑 Equipe
 
 <table>
   <tr>
