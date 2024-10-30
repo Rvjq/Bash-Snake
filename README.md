@@ -50,6 +50,14 @@ gcc -I./include src/*.c -o bash-snake
       <br>
       <sub><b>✉️ Rvjq@cesar.school</b></sub>
     </td>
+    <td align="center">
+      <a href="https://github.com/ogabrieltenorio">
+        <img src="https://avatars.githubusercontent.com/ogabrieltenorio" width="100px;" alt="Foto Gabriel Tenorio"/>
+        <br>
+        <sub><b>Gabriel Tenorio</b></sub>
+      </a>
+      <br>
+      <sub><b>✉️ gtlt@cesar.school</b></sub>
   </tr>
 </table>
 
