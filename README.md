@@ -1,6 +1,8 @@
 # 🍎 Bash Snake 🐍
 
 Um clone do famoso jogo da cobrinha para terminal Bash
+Para a materia de Programação Imperativa e Funcional - 2024.2.
+CESAR School
 
 ## 🎮 Controles
 

@@ -1,3 +1,10 @@
+/**
+ * main.c
+ * Created on Oct, 10th 2024
+ * Author: Rafael Varela
+ * Based on "Ozymandias"
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -19,9 +26,13 @@ typedef struct snakePart {
     struct snakePart *next;
 } SNAKEPART;
 
-void gameLoop ();
-
 void drawBorders (screenColor bg);
+
+void drawMainMenu ();
+
+// to be separeted
+
+void gameLoop ();
 
 void drawPoints (screenColor bg);
 
@@ -341,6 +352,10 @@ void drawPoints (screenColor bg) {
     screenGotoxy((MAXX/2)-7,1);
     printf("Pontuação: %03d",points);
     screenSetColor(WHITE, LIGHTRED);
+}
+
+void drawMainMenu () {
+    screenGotoxy(0,0);
 }
 
 void drawBorders (screenColor bg) {
