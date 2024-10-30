@@ -354,8 +354,18 @@ void drawPoints (screenColor bg) {
     screenSetColor(WHITE, LIGHTRED);
 }
 
+void undrawMenu() {
+    screenClear();
+    drawBorders(LIGHTRED);
+}
+
 void drawMainMenu () {
-    screenGotoxy(0,0);
+    screenGotoxy(MAXX/2-1,MAXY/2-1);
+    printf("Jogar");
+    screenGotoxy(MAXX/2,MAXY/2);
+    printf("Jogar");
+    screenGotoxy(MAXX/2-1,MAXY/2-1);
+    printf("Jogar");
 }
 
 void drawBorders (screenColor bg) {

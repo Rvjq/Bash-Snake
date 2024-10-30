@@ -60,7 +60,3 @@ gcc -I./include src/*.c -o bash-snake
       <sub><b>✉️ gtlt@cesar.school</b></sub>
   </tr>
 </table>
-
-tput init
-
-cd /mnt/c/Users/Rafael/Documents/snakegame2
