@@ -23,7 +23,7 @@ git clone https://github.com/Rvjq/Bash-Snake.git
 >Navegue até a pasta do jogo
 
 ```bash
-cd /Bash-Snake
+cd Bash-Snake
 ```
 >Compile o codigo
 

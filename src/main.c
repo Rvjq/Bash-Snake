@@ -68,6 +68,7 @@ int main() {
     keyboardInit();
     timerInit(100);
 
+    mainMenuLoop();
     gameLoop();
     while(1) {
         if(keyhit()) {
@@ -359,13 +360,73 @@ void undrawMenu() {
     drawBorders(LIGHTRED);
 }
 
-void drawMainMenu () {
-    screenGotoxy(MAXX/2-1,MAXY/2-1);
-    printf("Jogar");
-    screenGotoxy(MAXX/2,MAXY/2);
-    printf("Jogar");
-    screenGotoxy(MAXX/2-1,MAXY/2-1);
-    printf("Jogar");
+void nameLoop() {
+    undrawMenu();
+}
+
+void difficultyLoop() {
+    undrawMenu();
+}
+
+void scoreboardLoop() {
+    undrawMenu();
+}
+
+void mainMenuLoop () {
+    undrawMenu();
+    int option = 1;
+    int bool = 1;
+    while (bool) {
+        if(keyhit()) {
+            int key = readch();
+            if (key == 27) {
+                break;
+            } else if (key == 's') {
+                if (option<3) option++;
+            } else if (key == 'w') {
+                if (option>1) option--;
+            } else if (key == 13) {
+                switch (option) {
+                    case 1: difficultyLoop(); break;
+                    case 2: scoreboardLoop(); break;
+                    case 3: bool = 0; break;
+                }
+            }
+        }
+        drawMainMenu(option);
+        screenUpdate();
+    }
+}
+
+void drawMainMenu (int option) {
+    drawBorders(LIGHTRED);
+    screenGotoxy(MAXX/2-2,MAXY/2-1);
+    if (option == 1) {
+        screenSetColor(BLACK,LIGHTGRAY);
+        printf("Play");
+        screenSetNormal();
+    }
+    else {
+        printf("Play");
+    }
+    screenGotoxy(MAXX/2-5,MAXY/2);
+    if (option == 2) {
+        screenSetColor(BLACK,LIGHTGRAY);
+        printf("Scoreboard");
+        screenSetNormal();
+    }
+    else {
+        printf("Scoreboard");
+    }
+    screenGotoxy(MAXX/2-2,MAXY/2+1);
+    if (option == 3) {
+        screenSetColor(BLACK,LIGHTGRAY);
+        printf("Exit");
+        screenSetNormal();
+    }
+    else {
+        printf("Exit");
+    }
 }
 
 void drawBorders (screenColor bg) {
