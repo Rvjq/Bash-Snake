@@ -30,6 +30,22 @@ void drawBorders (screenColor bg);
 
 void drawMainMenu ();
 
+void drawScoreboardMenu();
+
+void drawDifficultyMenu(int option);
+
+void drawNameMenu();
+
+void mainMenuLoop();
+
+void difficultyLoop();
+
+void nameLoop();
+
+void scoreboardLoop();
+
+void undrawMenu();
+
 // to be separeted
 
 void gameLoop ();
@@ -67,17 +83,7 @@ int main() {
     screenInit(0);
     keyboardInit();
     timerInit(100);
-
     mainMenuLoop();
-    gameLoop();
-    while(1) {
-        if(keyhit()) {
-            int key = readch();
-            if (key == 27) {
-                break;
-            }
-        }
-    }
     timerDestroy();
     keyboardDestroy();
     screenDestroy();
@@ -85,6 +91,7 @@ int main() {
 }
 
 void gameLoop () {
+    undrawMenu();
     points = 0;
     drawBorders(RED);
     SNAKEPART *head = spawnSnake();
@@ -117,6 +124,16 @@ void gameLoop () {
         screenUpdate();
     }
     despawnSnake(head);
+    while(1) {
+        if(keyhit()) {
+            int key = readch();
+            if (key == 27) {
+                break;
+            }
+        }
+    }
+    undrawMenu();
+    screenUpdate();
 }
 
 void spawnFruit(SNAKEPART *snakeHead) {
@@ -356,20 +373,90 @@ void drawPoints (screenColor bg) {
 }
 
 void undrawMenu() {
+    // printf ("\033[2J");
     screenClear();
     drawBorders(LIGHTRED);
 }
 
 void nameLoop() {
     undrawMenu();
+    int bool = 1;
+    while (bool) {
+        if(keyhit()) {
+            int key = readch();
+            if (key == 27) {
+                break;
+            } else if (key == '\n') {
+                bool = 0;
+                gameLoop();
+            }
+        }
+        drawNameMenu();
+        screenUpdate();
+    }
+    undrawMenu();
+    screenUpdate();
+}
+
+void drawNameMenu() {
+    screenGotoxy(MAXX/2-2,MAXY/2-1);
+    printf("name");
 }
 
 void difficultyLoop() {
     undrawMenu();
+    int option = 1;
+    int bool = 1;
+    while (bool) {
+        if(keyhit()) {
+            int key = readch();
+            if (key == 27) {
+                break;
+            } else if (key == 's') {
+                if (option<3) option++;
+            } else if (key == 'w') {
+                if (option>1) option--;
+            } else if (key == '\n') {
+                switch (option) {
+                    case 1: difficulty = 1; break;
+                    case 2: difficulty = 2; break;
+                    case 3: difficulty = 3; break;
+                }
+                bool = 0;
+                nameLoop();
+            }
+        }
+        drawDifficultyMenu(option);
+        screenUpdate();
+    }
+    undrawMenu();
+    screenUpdate();
+}
+
+void drawDifficultyMenu(int option) {
+    screenGotoxy(MAXX/2-2,MAXY/2-1);
+    printf("Difficulty");
 }
 
 void scoreboardLoop() {
     undrawMenu();
+    while (1) {
+        if(keyhit()) {
+            int key = readch();
+            if (key == 27) {
+                break;
+            }
+        }
+        drawScoreboardMenu();
+        screenUpdate();
+    }
+    undrawMenu();
+    screenUpdate();
+}
+
+void drawScoreboardMenu() {
+    screenGotoxy(MAXX/2-2,MAXY/2-1);
+    printf("Score");
 }
 
 void mainMenuLoop () {
@@ -385,7 +472,7 @@ void mainMenuLoop () {
                 if (option<3) option++;
             } else if (key == 'w') {
                 if (option>1) option--;
-            } else if (key == 13) {
+            } else if (key == '\n') {
                 switch (option) {
                     case 1: difficultyLoop(); break;
                     case 2: scoreboardLoop(); break;
