@@ -8,6 +8,8 @@ CESAR School
 
 wasd - para se movimentar
 
+enter - para selecionar menus
+
 esc - para sair do jogo
 
 ## 💻 Compilar

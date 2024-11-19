@@ -13,9 +13,13 @@
 #include "screen.h"
 #include "timer.h"
 
-int snakeLenght = 3;
-int snakeDirection = 1;
-int difficulty = 1;
+#define NAMESIZE 6
+
+char name[NAMESIZE];
+int nameCursor = 0;
+
+int snakeDirection;
+int difficulty;
 int fruitX, fruitY;
 int points, gameRunning;
 int changedDirection;
@@ -25,6 +29,11 @@ typedef struct snakePart {
     struct snakePart *prev;
     struct snakePart *next;
 } SNAKEPART;
+
+typedef struct scores {
+    int score;
+    char name[NAMESIZE];
+} SCORES;
 
 void drawBorders (screenColor bg);
 
@@ -40,13 +49,17 @@ void mainMenuLoop();
 
 void difficultyLoop();
 
+void drawName();
+
 void nameLoop();
 
 void scoreboardLoop();
 
 void undrawMenu();
 
-// to be separeted
+void readScore(SCORES *scores, int fileSize);
+
+void writeScore();
 
 void gameLoop ();
 
@@ -79,6 +92,9 @@ void gameOver();
 void gameWin();
 
 int main() {
+    for (int i = 0; i<NAMESIZE; i++) {
+        name[i] = '_';
+    }
     srand(time(NULL));
     screenInit(0);
     keyboardInit();
@@ -92,6 +108,7 @@ int main() {
 
 void gameLoop () {
     undrawMenu();
+    snakeDirection = 1;
     points = 0;
     drawBorders(RED);
     SNAKEPART *head = spawnSnake();
@@ -115,6 +132,7 @@ void gameLoop () {
                 break;
             }
             drawPoints(RED);
+            drawName(RED);
             if (points == (MAXX-2)*(MAXY-2)) {
                 gameWin();
                 break;
@@ -132,8 +150,25 @@ void gameLoop () {
             }
         }
     }
+    writeScore();
     undrawMenu();
     screenUpdate();
+}
+
+void readScore(SCORES *scores, int fileSize) {
+    FILE *file = fopen("scores.txt", "r");
+    if (file == NULL) { screenGotoxy(3,3); printf("Erro na abertura do arquivo.\n"); return; }
+    for (int i = 0; i<fileSize; i++) {
+        fscanf(file, "%d %s\n", &scores[i].score , scores[i].name);
+    }
+    fclose(file);
+}
+
+void writeScore() {
+    FILE *file = fopen("scores.txt", "a");
+    if (file == NULL) { screenGotoxy(3,3); printf("Erro na abertura do arquivo.\n"); return; }
+    fprintf(file, "%d %s\n", points, name);
+    fclose(file);
 }
 
 void spawnFruit(SNAKEPART *snakeHead) {
@@ -372,6 +407,12 @@ void drawPoints (screenColor bg) {
     screenSetColor(WHITE, LIGHTRED);
 }
 
+void drawName (screenColor bg) {
+    screenSetColor(WHITE, bg);
+    screenGotoxy((MAXX/2)-6,MAXY);
+    printf("Nome: %s",name);
+    screenSetColor(WHITE, LIGHTRED);
+}
 void undrawMenu() {
     // printf ("\033[2J");
     screenClear();
@@ -382,25 +423,42 @@ void nameLoop() {
     undrawMenu();
     int bool = 1;
     while (bool) {
+        drawNameMenu();
+        screenUpdate();
         if(keyhit()) {
             int key = readch();
             if (key == 27) {
                 break;
+            } else if (key == 127 && nameCursor > 0) {
+                nameCursor--;
+                name[nameCursor] = '_';
             } else if (key == '\n') {
                 bool = 0;
                 gameLoop();
+            } else if (nameCursor < NAMESIZE && key != 127) {
+                name[nameCursor] = key;
+                nameCursor++;
             }
         }
-        drawNameMenu();
-        screenUpdate();
     }
     undrawMenu();
     screenUpdate();
 }
 
 void drawNameMenu() {
-    screenGotoxy(MAXX/2-2,MAXY/2-1);
-    printf("name");
+    screenGotoxy(MAXX/2-7,MAXY/2-1);
+    printf("Enter a Name:");
+    screenGotoxy(MAXX/2-NAMESIZE,MAXY/2);
+    for(int i = 0; i<NAMESIZE; i++) {
+        if (nameCursor == i) {
+            screenSetColor(BLACK,LIGHTGRAY);
+            printf("%c",name[i]);
+            screenSetNormal();
+        } else {
+            printf("%c",name[i]);
+        }
+        printf(" ");
+    }
 }
 
 void difficultyLoop() {
@@ -408,6 +466,8 @@ void difficultyLoop() {
     int option = 1;
     int bool = 1;
     while (bool) {
+        drawDifficultyMenu(option);
+        screenUpdate();
         if(keyhit()) {
             int key = readch();
             if (key == 27) {
@@ -426,37 +486,103 @@ void difficultyLoop() {
                 nameLoop();
             }
         }
-        drawDifficultyMenu(option);
-        screenUpdate();
     }
     undrawMenu();
     screenUpdate();
 }
 
 void drawDifficultyMenu(int option) {
+    screenGotoxy(MAXX/2-10,MAXY/2-3);
+    printf("Choose your difficulty:");
     screenGotoxy(MAXX/2-2,MAXY/2-1);
-    printf("Difficulty");
+    if (option == 1) {
+        screenSetColor(BLACK,LIGHTGRAY);
+        printf("Easy");
+        screenSetNormal();
+    }
+    else {
+        printf("Easy");
+    }
+    screenGotoxy(MAXX/2-3,MAXY/2);
+    if (option == 2) {
+        screenSetColor(BLACK,LIGHTGRAY);
+        printf("Medium");
+        screenSetNormal();
+    }
+    else {
+        printf("Medium");
+    }
+    screenGotoxy(MAXX/2-2,MAXY/2+1);
+    if (option == 3) {
+        screenSetColor(BLACK,LIGHTGRAY);
+        printf("Hard");
+        screenSetNormal();
+    }
+    else {
+        printf("Hard");
+    }
 }
 
 void scoreboardLoop() {
     undrawMenu();
     while (1) {
+        drawScoreboardMenu();
+        screenUpdate();
         if(keyhit()) {
             int key = readch();
             if (key == 27) {
                 break;
             }
         }
-        drawScoreboardMenu();
-        screenUpdate();
     }
     undrawMenu();
     screenUpdate();
 }
 
+int countLines() {
+    FILE *file = fopen("scores.txt", "r");
+    if (file == NULL) {
+        return -1;
+    }
+    int lineCount = 0;
+    char ch;
+    while ((ch = fgetc(file)) != EOF) {
+        if (ch == '\n') {
+            lineCount++;
+        }
+    }
+    fclose(file);
+    return lineCount;
+}
+
+void sortScoresDescending(SCORES *scores, int fileSize) {
+    for (int i = 0; i < fileSize - 1; i++) {
+        for (int j = 0; j < fileSize - i - 1; j++) {
+            if (scores[j].score < scores[j + 1].score) {
+                SCORES temp = scores[j];
+                scores[j] = scores[j + 1];
+                scores[j + 1] = temp;
+            }
+        }
+    }
+}
+
 void drawScoreboardMenu() {
-    screenGotoxy(MAXX/2-2,MAXY/2-1);
-    printf("Score");
+    screenGotoxy(MAXX/2-5,MAXY/2-5);
+    printf("Scoreboard:");
+    int fileSize = countLines();
+    if (fileSize <= 0) {
+        screenGotoxy(MAXX/2-9,MAXY/2-3);
+        printf("No Scores Detected");       
+    } else {
+        SCORES scores[fileSize];
+        readScore(scores, fileSize);
+        sortScoresDescending(scores, fileSize);
+        for (int i = 0; i<fileSize && i<10; i++) {
+            screenGotoxy(MAXX/2-7,MAXY/2-3+i);
+            printf("%02d. %s: %03d", i+1, scores[i].name, scores[i].score);
+        }
+    }
 }
 
 void mainMenuLoop () {
@@ -464,6 +590,8 @@ void mainMenuLoop () {
     int option = 1;
     int bool = 1;
     while (bool) {
+        drawMainMenu(option);
+        screenUpdate();
         if(keyhit()) {
             int key = readch();
             if (key == 27) {
@@ -480,13 +608,21 @@ void mainMenuLoop () {
                 }
             }
         }
-        drawMainMenu(option);
-        screenUpdate();
     }
 }
 
 void drawMainMenu (int option) {
     drawBorders(LIGHTRED);
+    // ╭╮╰╯│─ ▲►▼◄
+    screenSetColor(GREEN,LIGHTRED);
+    screenGotoxy(MAXX/2-9,MAXY/2-6);
+    printf("╭─► ╭╮▲ ╭─╮ ╷ ╱ ╭──");
+    screenGotoxy(MAXX/2-9,MAXY/2-5);
+    printf("╰─╮ │││ ├─┤ │╳  ├──");
+    screenGotoxy(MAXX/2-9,MAXY/2-4);
+    printf("──╯ ╵╰╯ ╵ ╵ ╵ ╲ ╰──");
+    screenSetNormal();
+
     screenGotoxy(MAXX/2-2,MAXY/2-1);
     if (option == 1) {
         screenSetColor(BLACK,LIGHTGRAY);
